@@ -11,6 +11,9 @@ class Team(db.Model):
     away_games = db.relationship('Game', backref='away_team', primaryjoin='and_(Team.id==Game.away_team_id, )')
     votes = db.relationship('Vote', backref='team')
 
+    def __repr__(self):
+        return f'<Team {self.name}>'
+
     def __str__(self):
         return f'{self.city} {self.name}'
 
@@ -24,13 +27,21 @@ class Team(db.Model):
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     schedule_status = db.Column(db.String(50))
+    original_date = db.Column(db.Date, default=None)
+    original_time = db.Column(db.Time, default=None)
     delayed_or_postponed_reason = db.Column(db.String(50))
     location = db.Column(db.String(50))
-    date = db.Column(db.DateTime)
-    time = db.Column(db.DateTime)
+    date = db.Column(db.Date)
+    time = db.Column(db.Time)
     home_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
     away_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
     votes = db.relationship('Vote', backref='game')
+
+    def __repr__(self):
+        return f'<Game {self.id}>'
+
+    def __str__(self):
+        return f'{self.home_team} vs {self.away_team} @ {self.location} on {self.date}'
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -39,6 +50,12 @@ class User(db.Model):
     password_hash = db.Column(db.String(128))
     total_votes = db.Column(db.Integer, default=0)
     votes = db.relationship('Vote', backref='voter')
+
+    def __repr__(self):
+        return f'<User {self.username}>'
+
+    def __str__(self):
+        return f'{self.username}'
 
     def add_vote(self):
         self.total_votes += 1
@@ -62,6 +79,9 @@ class Vote(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
 
+    def __repr__(self):
+        return f'<Vote {self.id}>'
+
     def __str__(self):
         user = User.query.get(self.user_id)
         game = Game.query.get(self.game_id)
@@ -72,16 +92,7 @@ class Vote(db.Model):
     @classmethod
     def place_vote(cls, user, game, team):
         vote = Vote(voter=user, game=game, team=team)
-        print(f'IN CLASS METH {user.total_votes}')
         user.add_vote()
         team.add_vote()
         db.session.add(vote)
         db.session.commit()
-        print(vote)    
-
-    # def place_vote(self, user_id, game_id, team_id):
-    #     vote = Vote(user_id=user_id, game_id=game_id, team_id=team_id)
-    #     db.session.add(vote)
-    #     db.session.commit()
-
-    #     return vote

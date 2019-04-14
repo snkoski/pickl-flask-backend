@@ -84,30 +84,16 @@ class TeamModelCase(unittest.TestCase):
                      home_team=team1, 
                      away_team=team2
         )
-        # vote1 = Vote(voter=user1, game=game1, team=team1)
         db.session.add_all([user1, team1, team2, game1])
         db.session.commit()
-        # self.assertEqual(vote1.voter, user1)
-        # self.assertEqual(vote1.team.name, 'Yankees')
-        # self.assertEqual(vote1.game.location, 'Yankee Stadium')
-        # self.assertEqual(vote1.game.away_team.name, 'Cubs')
-
+        
+        # User vote method
         user1.vote_for_team(game1, team2)
         self.assertEqual(team2.total_votes, 1)
 
-        # new_vote = Vote(user_id=user1.id, game_id=game1.id, team_id=team1.id)
-        # db.session.add(new_vote)
-        # db.session.commit()
-        # print(new_vote.voter)
-        # self.assertEqual(new_vote.voter, user1)
-        # self.assertEqual(new_vote.game, game1)
-        # self.assertEqual(new_vote.team, team1)
-        print(f'BEFORE CLASS METH {user1.total_votes}')
+        # Vote class method to create new vote
         Vote.place_vote(user1, game1, team2)
         self.assertEqual(team2.total_votes, 2)
-
-
-
 
     def test_add_remove_vote(self):
         team1 = Team(name='Yankees', city='New York', abbreviation='NYY')
@@ -129,9 +115,6 @@ class TeamModelCase(unittest.TestCase):
         team1.remove_vote()
         self.assertEqual(team1.total_votes, 0)
 
-
-
-    
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
