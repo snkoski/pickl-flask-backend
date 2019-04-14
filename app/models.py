@@ -1,4 +1,5 @@
 from app import db
+from flask import current_app
 
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
