@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from config import Config
 from flask_migrate import Migrate
+from flask_marshmallow import Marshmallow
+
 
 # app = Flask(__name__)
 # app.config.from_object(Config)
@@ -13,6 +15,7 @@ from flask_migrate import Migrate
 
 db = SQLAlchemy()
 migrate = Migrate()
+ma = Marshmallow()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -20,6 +23,7 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     migrate.init_app(app, db)
+    ma.init_app(app)
 
     from app.main import bp as main_bp
     app.register_blueprint(main.bp)
