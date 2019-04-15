@@ -1,7 +1,8 @@
 from app.api import bp
-from flask import jsonify
-from app.models import Game
+from flask import jsonify, request
+from app.models import Game, Team
 from app.schemas import GameSchema
+from app import db, helper
 
 @bp.route('/games/<int:id>', methods=['GET'])
 def get_game(id):
@@ -19,7 +20,17 @@ def get_games():
 
 @bp.route('/games', methods=['POST'])
 def create_games():
-    pass
+    data = request.get_json(force=True)
+    print(data)
+    new_game = Game(schedule_status=data['scheduleStatus'], 
+             date=helper.format_date(data['date']), 
+             time=helper.format_time(data['time']), 
+             away_team_id = Team.query.filter_by(name=data['awayTeam']['Name']).first().id, 
+             home_team_id = Team.query.filter_by(name=data['homeTeam']['Name']).first().id, 
+             location=data['location'])
+    db.session.add(new_game)
+    db.session.commit()
+    return 'hi'
 
 @bp.route('/games/<int:id>', methods=['PUT'])
 def update_game(id):

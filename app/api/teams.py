@@ -1,7 +1,8 @@
 from app.api import bp
-from flask import jsonify
+from flask import jsonify, request
 from app.models import Team
 from app.schemas import TeamSchema
+from app import db
 
 @bp.route('/teams/<int:id>', methods=['GET'])
 def get_team(id):
@@ -18,7 +19,15 @@ def get_teams():
 
 @bp.route('/teams', methods=['POST'])
 def create_teams():
-    pass
+    data = request.get_json(force=True)
+    print(data)
+    new_team = Team(name=data['name'],  
+             city=data['city'], 
+             abbreviation=data['abbreviation'],
+             logo=data['logo'])
+    db.session.add(new_team)
+    db.session.commit()
+    return 'hi'
 
 @bp.route('/teams/<int:id>', methods=['PUT'])
 def update_team(id):

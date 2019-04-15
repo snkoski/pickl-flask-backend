@@ -59,7 +59,7 @@ class Game(db.Model):
     original_time = db.Column(db.Time, default=None)
     delayed_or_postponed_reason = db.Column(db.String(50))
     location = db.Column(db.String(50))
-    date = db.Column(db.Date)
+    date = db.Column(db.Date, index=True)
     time = db.Column(db.Time)
     home_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
     away_team_id = db.Column(db.Integer, db.ForeignKey('team.id'))

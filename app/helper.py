@@ -13,7 +13,7 @@ def format_time(api_time):
     #'1:05PM'
     period = api_time[-2:]
     time_list = list(map(int, api_time[:-2].split(':')))
-    if period == 'PM':
+    if period == 'PM' and time_list[0] != 12:
         time_list[0] += 12
     new_time = datetime.time(time_list[0], time_list[1])
     return new_time
