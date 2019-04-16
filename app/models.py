@@ -1,13 +1,7 @@
-from app import db
+from app import db, login
 from flask import current_app
-
-# class APIMixin(object):
-#     @staticmethod
-#     def to_collection_dict(query, **kwargs):
-#         data ={
-#             'items': [item.to_dict() for item in query]
-#         }
-#         return data
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,25 +19,6 @@ class Team(db.Model):
 
     def __str__(self):
         return f'{self.city} {self.name}'
-
-    # def to_dict(self, include_email=False):
-    #     data = {
-    #         'id': self.id,
-    #         'name': self.name,
-    #         'city': self.city,
-    #         'abbreviation': self.abbreviation,
-    #         'logo': self.logo,
-    #         'total_votes': self.total_votes
-    #     }
-        
-    #     return data
-
-    # def from_dict(self, data, new_user=False):
-    #     for field in ['username', 'email']:
-    #         if field in data:
-    #             setattr(self, field, data[field])
-    #     if new_user and 'password' in data:
-    #         self.set_password(data['password'])
 
     def add_vote(self):
         self.total_votes += 1
@@ -71,23 +46,7 @@ class Game(db.Model):
     def __str__(self):
         return f'{self.home_team} vs {self.away_team} @ {self.location} on {self.date}'
 
-    # def to_dict(self, include_email=False):
-    #     data = {
-    #         'id': self.id,
-    #         'schedule_status': self.schedule_status,
-    #         'original_date': self.original_date,
-    #         'original_time': self.original_time,
-    #         'delayed_or_postponed_reason': self.delayed_or_postponed_reason,
-    #         'location': self.location,
-    #         'date': self.date,
-    #         'time': self.time,
-    #         'home_team_id': self.home_team_id,
-    #         'away_team_id': self.away_team_id
-    #     }
-        
-    #     return data
-
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -101,6 +60,12 @@ class User(db.Model):
     def __str__(self):
         return f'{self.username}'
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
     # def to_dict(self, include_email=False):
     #     data = {
     #         'id': self.id,
@@ -111,12 +76,12 @@ class User(db.Model):
     #         data['email'] = self.email
     #     return data
 
-    # def from_dict(self, data, new_user=False):
-    #     for field in ['username', 'email']:
-    #         if field in data:
-    #             setattr(self, field, data[field])
-    #     if new_user and 'password' in data:
-    #         self.set_password(data['password'])
+    def from_dict(self, data, new_user=False):
+        for field in ['username', 'email']:
+            if field in data:
+                setattr(self, field, data[field])
+        if new_user and 'password' in data:
+            self.set_password(data['password'])
 
     def add_vote(self):
         self.total_votes += 1
