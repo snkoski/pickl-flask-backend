@@ -8,7 +8,7 @@ from app.schemas import UserSchema
 
 @bp.route('/users/<int:id>', methods=['GET'])
 def get_user(id):
-    one_user = User.query.get(id)
+    one_user = User.query.get_or_404(id)
     user_schema = UserSchema()
     output = user_schema.dump(one_user).data
     return jsonify({'user' : output})
@@ -22,7 +22,6 @@ def get_users():
 
 @bp.route('/users', methods=['POST'])
 def create_user():
-    user_schema = UserSchema()
     data = request.get_json() or {}
     if 'username' not in data or 'email' not in data or 'password' not in data:
         return bad_request('must include username, email, and password fields')
@@ -34,6 +33,7 @@ def create_user():
     user.from_dict(data, new_user=True)
     db.session.add(user)
     db.session.commit()
+    user_schema = UserSchema()
     output = user_schema.dump(user).data
     response = jsonify({'user': output})
     response.status_code = 201
@@ -42,4 +42,14 @@ def create_user():
 
 @bp.route('/users/<int:id>', methods=['PUT'])
 def update_user(id):
-    pass
+    user = User.query.get_or_404(id)
+    data = request.get_json() or {}
+    if 'username' in data and data['username'] != user.username and User.query.filter_by(username=data['username']).first():
+        return bad_request('please use a different username')
+    if 'email' in data and data['email'] != user.email and User.query.filter_by(email=data['email']).first():
+        return bad_request('please use a different email address')
+    user.from_dict(data, new_user=False)
+    db.session.commit()
+    user_schema = UserSchema()
+    output = user_schema.dump(user).data
+    return jsonify({'user': output})
