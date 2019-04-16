@@ -3,6 +3,7 @@ from flask import jsonify, request
 from app.models import Game, Team
 from app.schemas import GameSchema
 from app import db, helper
+import datetime
 
 @bp.route('/games/<int:id>', methods=['GET'])
 def get_game(id):
@@ -32,9 +33,6 @@ def create_games():
     else:
         originalTime = None
 
-    # if day['delayedOrPostponedReason'] != None:
-    #     reason = 
-
     new_game = Game(schedule_status=data['scheduleStatus'],
              original_date=originalDate,
              original_time=originalTime,
@@ -47,6 +45,14 @@ def create_games():
     db.session.add(new_game)
     db.session.commit()
     return 'hi'
+
+@bp.route('/games/today', methods=['GET'])
+def get_todays_games():
+    today = str(datetime.date.today())
+    todays_games = Game.query.filter(Game.date == today).all()
+    game_schema = GameSchema(many=True)
+    output = game_schema.dump(todays_games).data
+    return jsonify({'game': output})
 
 @bp.route('/games/<int:id>', methods=['PUT'])
 def update_game(id):
