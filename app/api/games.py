@@ -22,7 +22,23 @@ def get_games():
 def create_games():
     data = request.get_json(force=True)
     print(data)
-    new_game = Game(schedule_status=data['scheduleStatus'], 
+    if data['originalDate'] != None:
+        originalDate = helper.format_date(data['originalDate'])
+    else:
+        originalDate = None
+
+    if data['originalTime'] != None:
+        originalTime = helper.format_time(data['originalTime'])
+    else:
+        originalTime = None
+
+    # if day['delayedOrPostponedReason'] != None:
+    #     reason = 
+
+    new_game = Game(schedule_status=data['scheduleStatus'],
+             original_date=originalDate,
+             original_time=originalTime,
+             delayed_or_postponed_reason=data['delayedOrPostponedReason'],
              date=helper.format_date(data['date']), 
              time=helper.format_time(data['time']), 
              away_team_id = Team.query.filter_by(name=data['awayTeam']['Name']).first().id, 
