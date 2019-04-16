@@ -1,12 +1,14 @@
 from app import db
 from app.api import bp
 from app.api.errors import bad_request
-from flask import jsonify, url_for
+from app.api.auth import token_auth
+from flask import jsonify, url_for, g, abort
 from app.models import User
 from flask import request
 from app.schemas import UserSchema
 
 @bp.route('/users/<int:id>', methods=['GET'])
+@token_auth.login_required
 def get_user(id):
     one_user = User.query.get_or_404(id)
     user_schema = UserSchema()
@@ -14,6 +16,7 @@ def get_user(id):
     return jsonify({'user' : output})
 
 @bp.route('/users', methods=['GET'])
+@token_auth.login_required
 def get_users():
     all_users = User.query.all()
     user_schema = UserSchema(many=True)
@@ -41,7 +44,10 @@ def create_user():
     return response
 
 @bp.route('/users/<int:id>', methods=['PUT'])
+@token_auth.login_required
 def update_user(id):
+    if g.current_user.id != id:
+        abort(403)
     user = User.query.get_or_404(id)
     data = request.get_json() or {}
     if 'username' in data and data['username'] != user.username and User.query.filter_by(username=data['username']).first():
