@@ -9,7 +9,7 @@ def get_token():
 
     token = g.current_user.get_token()
     db.session.commit()
-    return jsonify({'token': token})
+    return jsonify({'token': token, 'id': g.current_user.id})
 
 @bp.route('/tokens', methods=['DELETE'])
 @token_auth.login_required

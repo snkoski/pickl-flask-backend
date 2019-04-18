@@ -10,6 +10,8 @@ from app.schemas import UserSchema
 @bp.route('/users/<int:id>', methods=['GET'])
 @token_auth.login_required
 def get_user(id):
+    if g.current_user.id != id:
+        abort(403)
     one_user = User.query.get_or_404(id)
     user_schema = UserSchema()
     output = user_schema.dump(one_user).data
