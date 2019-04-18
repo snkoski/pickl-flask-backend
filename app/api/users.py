@@ -1,16 +1,25 @@
-from app import db
+from app import db, guard
 from app.api import bp
 from app.api.errors import bad_request
-from app.api.auth import token_auth
-from flask import jsonify, url_for, g, abort
+from flask import jsonify, url_for, abort, request
 from app.models import User
 from flask import request
 from app.schemas import UserSchema
+from flask_praetorian import auth_required, roles_required
+
+@bp.route('/login', methods=['POST'])
+def login():
+    req = request.get_json(force=True)
+    username = req.get('username', None)
+    password = req.get('password', None)
+    user = guard.authenticate(username, password)
+    ret = {'access_token': guard.encode_jwt_token(user)}
+    return jsonify(ret), 200
 
 @bp.route('/users/<int:id>', methods=['GET'])
-@token_auth.login_required
+@auth_required
 def get_user(id):
-    if g.current_user.id != id:
+    if flask_praetorian.current_user().id != id:
         abort(403)
     one_user = User.query.get_or_404(id)
     user_schema = UserSchema()
@@ -18,12 +27,12 @@ def get_user(id):
     return jsonify({'user' : output})
 
 @bp.route('/users', methods=['GET'])
-@token_auth.login_required
+@roles_required('admin')
 def get_users():
     all_users = User.query.all()
     user_schema = UserSchema(many=True)
     output = user_schema.dump(all_users).data
-    return jsonify({'user': output})
+    return jsonify({'users': output})
 
 @bp.route('/users', methods=['POST'])
 def create_user():
@@ -46,9 +55,9 @@ def create_user():
     return response
 
 @bp.route('/users/<int:id>', methods=['PUT'])
-@token_auth.login_required
+@auth_required
 def update_user(id):
-    if g.current_user.id != id:
+    if flask_praetorian.current_user().id != id:
         abort(403)
     user = User.query.get_or_404(id)
     data = request.get_json() or {}
