@@ -12,8 +12,21 @@ def login():
     username = req.get('username', None)
     password = req.get('password', None)
     user = guard.authenticate(username, password)
-    ret = {'access_token': guard.encode_jwt_token(user), 'id': user.id}
+    ret = {'token': guard.encode_jwt_token(user), 'user':{'username': user.username, 'id': user.id}}
     return jsonify(ret), 200
+
+@bp.route('/reauth', methods=['GET'])
+@auth_required
+def reauth_user():
+    if current_user():
+        user = User.query.get(current_user().id)
+        token = guard.read_token_from_header()
+        try:
+            new_token = guard.refresh_jwt_token(token)
+            return jsonify({'username': user.username, 'id': user.id, 'token': new_token})
+        except:
+            pass
+        return jsonify({'user': {'username': user.username, 'id': user.id}, 'token': token})
 
 @bp.route('/users/<int:id>', methods=['GET'])
 @auth_required
