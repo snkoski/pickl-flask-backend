@@ -10,6 +10,7 @@ def get_team(id):
     team_schema = TeamSchema()
     output = team_schema.dump(one_team).data
     return jsonify({'team': output})
+
 @bp.route('/teams', methods=['GET'])
 def get_teams():
     all_teams = Team.query.all()
