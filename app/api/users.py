@@ -59,12 +59,10 @@ def create_user():
     user.from_dict(data, new_user=True)
     db.session.add(user)
     db.session.commit()
-    user_schema = UserSchema()
-    output = user_schema.dump(user).data
-    response = jsonify({'user': output})
-    response.status_code = 201
-    response.headers['Location'] = url_for('api.get_user', id=user.id)
-    return response
+    new_user = guard.authenticate(data['username'], data['password'])
+    response = {'token': guard.encode_jwt_token(new_user), 'user':{'username': new_user.username, 'id': new_user.id}}
+
+    return jsonify(response), 200
 
 @bp.route('/users/<int:id>', methods=['PUT'])
 @auth_required
