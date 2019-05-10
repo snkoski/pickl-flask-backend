@@ -58,7 +58,7 @@ def create_user():
     user = User()
     user.from_dict(data, new_user=True)
     db.session.add(user)
-    db.session.commit()
+    db.session.commit() 
     new_user = guard.authenticate(data['username'], data['password'])
     response = {'token': guard.encode_jwt_token(new_user), 'user':{'username': new_user.username, 'id': new_user.id}}
 

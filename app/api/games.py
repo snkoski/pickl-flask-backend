@@ -1,9 +1,28 @@
 from app.api import bp
-from flask import jsonify, request
+from flask import jsonify, request, redirect
 from app.models import Game, Team
 from app.schemas import GameSchema
 from app import db, helper
 import datetime
+from twilio.twiml.messaging_response import MessagingResponse
+
+@bp.route('/sms', methods=['GET', 'POST'])
+def sms_dynamic():
+    """Send a dynamic reply to an incoming text message"""
+    # Get the message the user sent our Twilio number
+    body = request.values.get('Body', None)
+
+    # Start our TwiML response
+    resp = MessagingResponse()
+
+    # Determine the right reply for this message
+    if body == 'hello':
+        resp.message("Hi!")
+    elif body == 'bye':
+        resp.message("Goodbye")
+
+    return str(resp)
+    # return str("hey")
 
 @bp.route('/games/<int:id>', methods=['GET'])
 def get_game(id):
@@ -57,3 +76,24 @@ def get_todays_games():
 @bp.route('/games/<int:id>', methods=['PUT'])
 def update_game(id):
     pass
+
+@bp.route('/test', methods=['GET', 'POST'])
+def test():
+    body = request.values.get('Body', None)
+    resp = MessagingResponse()
+    if body.lower() == 'games':
+        today = str(datetime.date.today())
+        todays_games = Game.query.filter(Game.date == today).all()
+        teams = []
+        for game in todays_games:
+            time = game.time
+            time = time.strftime("%-I:%M %p")
+            string = f'{game.away_team.name} @ {game.home_team.name} {time}'
+            teams.append(string)
+        game_list = ',\n'.join(teams)
+        print(game_list)
+        resp.message(game_list)
+    else:
+        resp.message("I only know baseball games right now")
+    return str(resp)
+    # return jsonify({'test': 'worked'})
