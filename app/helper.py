@@ -17,3 +17,6 @@ def format_time(api_time):
         time_list[0] += 12
     new_time = datetime.time(time_list[0], time_list[1])
     return new_time
+
+# def to_twelve_hour(time):
+    #15:30:00
