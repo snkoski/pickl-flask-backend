@@ -81,7 +81,7 @@ def update_game(id):
 def test():
     body = request.values.get('Body', None)
     resp = MessagingResponse()
-    if body.lower() == 'games':
+    if body.lower() == 'mlb':
         today = str(datetime.date.today())
         todays_games = Game.query.filter(Game.date == today).all()
         teams = []

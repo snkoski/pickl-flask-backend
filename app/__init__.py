@@ -27,6 +27,8 @@ def create_app(config_class=Config):
     ma.init_app(app)
     login.init_app(app)
     cors.init_app(app)
+    with app.app_context():
+        db.create_all()
     
     from app.models import User
     guard.init_app(app, User)
