@@ -11,6 +11,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
+    phone = db.Column(db.String(15), unique=True)
     password = db.Column(db.String(128))
     roles = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True, server_default='true')
@@ -43,7 +44,7 @@ class User(db.Model):
         self.password = guard.encrypt_password(password)
 
     def from_dict(self, data, new_user=False):
-        for field in ['username', 'email', 'roles']:
+        for field in ['username', 'email', 'phone', 'roles']:
             if field in data:
                 setattr(self, field, data[field])
         if new_user and 'password' in data:
