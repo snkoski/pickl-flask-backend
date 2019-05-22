@@ -12,7 +12,7 @@ class User(db.Model):
     username = db.Column(db.String(64), unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     phone = db.Column(db.String(15), unique=True)
-    password = db.Column(db.String(128))
+    password = db.Column(db.Text)
     roles = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True, server_default='true')
     total_votes = db.Column(db.Integer, default=0)

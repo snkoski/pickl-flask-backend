@@ -11,7 +11,7 @@ from flask_praetorian import auth_required, roles_required, current_user
 @auth_required
 def get_user_votes(id):
     
-    print("USer", current_user())
+    print("User", current_user())
     user = User.query.get(id)
     votes = user.votes
     vote_schema = VoteSchema(many=True)
